@@ -1,0 +1,41 @@
+# Dataset settings
+datasets:
+  moons:
+    n_samples: 500
+    noise: 0.2
+    random_state: 42
+  breast_cancer:
+    test_size: 0.2
+    random_state: 42
+
+# Network architecture defaults
+network:
+  hidden_layers: [16, 8]
+  activation: "relu"          # relu, sigmoid, tanh
+  output_activation: "sigmoid"
+  weight_init: "he"           # zeros, random, xavier, he
+
+# Training settings
+training:
+  epochs: 500
+  learning_rate: 0.01
+  batch_size: 32
+  optimizer: "adam"            # sgd, momentum, rmsprop, adam
+  momentum_beta: 0.9
+  rmsprop_beta: 0.999
+  adam_beta1: 0.9
+  adam_beta2: 0.999
+  adam_epsilon: 1.0e-8
+
+# Regularization settings
+regularization:
+  l1_lambda: 0.0
+  l2_lambda: 0.0
+  dropout_rate: 0.0
+  early_stopping_patience: 20
+
+# Cross-validation settings
+cross_validation:
+  k_folds: 5
+  shuffle: true
+  random_state: 42
