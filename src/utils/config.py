@@ -58,6 +58,34 @@ class CrossValidationConfig:
     random_state:  int  = _phase1_cfg["cross_validation"]["random_state"]
 
 
+_phase2_cfg = load_yaml("phase2_config.yaml")
+
+class Phase2DatasetConfig:
+    name:                   str  = _phase2_cfg["dataset"]["name"]
+    subset_classes:          int  = _phase2_cfg["dataset"]["subset_classes"]
+    subset_size_per_class:    int  = _phase2_cfg["dataset"]["subset_size_per_class"]
+    full_run_all_classes:      bool = _phase2_cfg["dataset"]["full_run_all_classes"]
+    test_size:                  float = _phase2_cfg["dataset"]["test_size"]
+    random_state:                 int  = _phase2_cfg["dataset"]["random_state"]
+
+class Phase2ConvConfig:
+    kernel_size: int = _phase2_cfg["conv"]["kernel_size"]
+    stride:       int = _phase2_cfg["conv"]["stride"]
+    padding:       int = _phase2_cfg["conv"]["padding"]
+
+class Phase2TrainingConfig:
+    epochs:         int   = _phase2_cfg["training"]["epochs"]
+    learning_rate:   float = _phase2_cfg["training"]["learning_rate"]
+    batch_size:       int   = _phase2_cfg["training"]["batch_size"]
+    optimizer:         str   = _phase2_cfg["training"]["optimizer"]
+    weight_decay:        float = _phase2_cfg["training"]["weight_decay"]
+
+class Phase2AugmentationConfig:
+    horizontal_flip:      bool = _phase2_cfg["augmentation"]["horizontal_flip"]
+    rotation_degrees:       int  = _phase2_cfg["augmentation"]["rotation_degrees"]
+    random_crop_padding:      int  = _phase2_cfg["augmentation"]["random_crop_padding"]
+
+
 class EnvSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=ROOT_DIR / ".env",
@@ -75,6 +103,10 @@ class Settings:
     cross_validation:    CrossValidationConfig  = CrossValidationConfig()
     env:                 EnvSettings            = EnvSettings()
     root_dir:            Path                   = ROOT_DIR
+    phase2_dataset:     Phase2DatasetConfig     = Phase2DatasetConfig()
+    phase2_conv:          Phase2ConvConfig        = Phase2ConvConfig()
+    phase2_training:        Phase2TrainingConfig    = Phase2TrainingConfig()
+    phase2_augmentation:       Phase2AugmentationConfig = Phase2AugmentationConfig()
 
 
 settings = Settings()

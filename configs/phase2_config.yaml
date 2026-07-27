@@ -1,0 +1,29 @@
+dataset:
+  name: "cifar10"
+  subset_classes: 4          # use a 4-class subset for fast iteration
+  subset_size_per_class: 1000
+  full_run_all_classes: false
+  test_size: 0.2
+  random_state: 42
+
+conv:
+  kernel_size: 3
+  stride: 1
+  padding: 1
+
+training:
+  epochs: 30
+  learning_rate: 0.001
+  batch_size: 64
+  optimizer: "adam"
+  weight_decay: 0.0001
+
+augmentation:
+  horizontal_flip: true
+  rotation_degrees: 15
+  random_crop_padding: 4
+
+cross_validation:
+  k_folds: 5
+  shuffle: true
+  random_state: 42
