@@ -9,14 +9,45 @@ connections:
     BatchNormCNN   -- same architecture + BatchNorm after every conv
     ResNetCNN      -- same depth budget, using residual blocks
 
+Channel lists are built dynamically (not hardcoded) so any depth is
+supported, from very shallow (depth=2) to very deep (depth=20+) --
+this is what lets us run the depth ablation study without index errors.
+
 Usage:
     from src.phase2_cnn.cnn_architectures import PlainCNN, BatchNormCNN, ResNetCNN
-    model = ResNetCNN(num_classes=4)
+    model = ResNetCNN(num_classes=4, depth=12)
 """
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+
+def _build_channel_list(depth: int, max_channels: int = 128) -> list[int]:
+    """
+    Generate a channel progression for PlainCNN/BatchNormCNN at any depth.
+
+    Starts at 3 (RGB input channels), doubles through the standard
+    32 -> 64 -> 128 progression, then holds at max_channels for any
+    additional depth requested. Always returns a list with at least
+    depth+1 entries so channels[depth] is always safely indexable.
+    """
+    channels = [3, 32, 64]
+    while len(channels) <= depth:
+        channels.append(max_channels)
+    return channels
+
+
+def _build_resnet_channel_list(depth: int, max_channels: int = 128) -> list[int]:
+    """
+    Same progression logic as _build_channel_list, but starting from
+    32 (the stem's output channels) rather than 3, since ResNetCNN's
+    stem already handles the initial 3->32 conversion separately.
+    """
+    channels = [32, 64]
+    while len(channels) < depth:
+        channels.append(max_channels)
+    return channels[:depth]
 
 
 class PlainCNN(nn.Module):
@@ -26,14 +57,17 @@ class PlainCNN(nn.Module):
     """
     def __init__(self, num_classes: int = 10, depth: int = 4):
         super().__init__()
-        channels = [3, 32, 64, 128, 128, 128, 128, 128, 128][: depth + 1]
+        channels = _build_channel_list(depth)
 
         layers = []
+        spatial_size = 32
         for i in range(depth):
             layers.append(nn.Conv2d(channels[i], channels[i + 1], kernel_size=3, padding=1))
             layers.append(nn.ReLU())
-            if i % 2 == 1:
+            # Only pool if doing so keeps spatial size at 2x2 or larger
+            if i % 2 == 1 and spatial_size >= 4:
                 layers.append(nn.MaxPool2d(2))
+                spatial_size //= 2
 
         self.features = nn.Sequential(*layers)
         self.pool     = nn.AdaptiveAvgPool2d((4, 4))
@@ -61,15 +95,17 @@ class BatchNormCNN(nn.Module):
     """
     def __init__(self, num_classes: int = 10, depth: int = 4):
         super().__init__()
-        channels = [3, 32, 64, 128, 128, 128, 128, 128, 128][: depth + 1]
+        channels = _build_channel_list(depth)
 
         layers = []
+        spatial_size = 32
         for i in range(depth):
             layers.append(nn.Conv2d(channels[i], channels[i + 1], kernel_size=3, padding=1))
             layers.append(nn.BatchNorm2d(channels[i + 1]))
             layers.append(nn.ReLU())
-            if i % 2 == 1:
+            if i % 2 == 1 and spatial_size >= 4:
                 layers.append(nn.MaxPool2d(2))
+                spatial_size //= 2
 
         self.features = nn.Sequential(*layers)
         self.pool     = nn.AdaptiveAvgPool2d((4, 4))
@@ -132,7 +168,7 @@ class ResNetCNN(nn.Module):
             nn.ReLU(),
         )
 
-        channels = [32, 64, 128, 128, 128, 128, 128, 128][:depth]
+        channels = _build_resnet_channel_list(depth)
         blocks = []
         in_ch = 32
         for i, out_ch in enumerate(channels):
