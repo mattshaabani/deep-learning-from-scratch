@@ -85,6 +85,33 @@ class Phase2AugmentationConfig:
     rotation_degrees:       int  = _phase2_cfg["augmentation"]["rotation_degrees"]
     random_crop_padding:      int  = _phase2_cfg["augmentation"]["random_crop_padding"]
 
+_phase3_cfg = load_yaml("phase3_config.yaml")
+
+class Phase3DatasetConfig:
+    source:       str   = _phase3_cfg["dataset"]["source"]
+    source_url:    str   = _phase3_cfg["dataset"]["source_url"]
+    train_split:    float = _phase3_cfg["dataset"]["train_split"]
+    random_state:     int   = _phase3_cfg["dataset"]["random_state"]
+
+class Phase3SequenceConfig:
+    seq_lengths_to_test:  list = _phase3_cfg["sequence"]["seq_lengths_to_test"]
+    default_seq_length:    int  = _phase3_cfg["sequence"]["default_seq_length"]
+    batch_size:              int  = _phase3_cfg["sequence"]["batch_size"]
+
+class Phase3ModelConfig:
+    hidden_size:     int = _phase3_cfg["model"]["hidden_size"]
+    embedding_size:   int = _phase3_cfg["model"]["embedding_size"]
+
+class Phase3TrainingConfig:
+    epochs:              int   = _phase3_cfg["training"]["epochs"]
+    learning_rate:         float = _phase3_cfg["training"]["learning_rate"]
+    optimizer:               str   = _phase3_cfg["training"]["optimizer"]
+    gradient_clip_norm:        float = _phase3_cfg["training"]["gradient_clip_norm"]
+
+class Phase3GenerationConfig:
+    temperature:       float = _phase3_cfg["generation"]["temperature"]
+    generate_length:     int   = _phase3_cfg["generation"]["generate_length"]
+
 
 class EnvSettings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -107,6 +134,11 @@ class Settings:
     phase2_conv:          Phase2ConvConfig        = Phase2ConvConfig()
     phase2_training:        Phase2TrainingConfig    = Phase2TrainingConfig()
     phase2_augmentation:       Phase2AugmentationConfig = Phase2AugmentationConfig()
+    phase3_dataset:     Phase3DatasetConfig     = Phase3DatasetConfig()
+    phase3_sequence:      Phase3SequenceConfig    = Phase3SequenceConfig()
+    phase3_model:           Phase3ModelConfig       = Phase3ModelConfig()
+    phase3_training:          Phase3TrainingConfig    = Phase3TrainingConfig()
+    phase3_generation:          Phase3GenerationConfig  = Phase3GenerationConfig()
 
 
 settings = Settings()
