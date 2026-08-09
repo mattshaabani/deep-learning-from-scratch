@@ -24,11 +24,13 @@ history = trainer.fit(epochs=15, seq_length=100, steps_per_epoch=50, verbose=Tru
 print("\nGeneration AFTER training (should show some structure):")
 print(generate_text(model, dataset, seed_text="ROMEO:", length=150, temperature=0.8))
 
-print("\n\n=== Small smoke test of sequence ablation (2 lengths, 2 epochs) ===")
+print("\n\n=== FULL Sequence Ablation Study ===")
 from src.phase3_rnn.sequence_ablation import run_sequence_ablation
 
-results = run_sequence_ablation(seq_lengths=[20, 100], epochs=2, steps_per_epoch=10)
-for run_name, h in results.items():
-    print(f"{run_name}: final_val_loss={h['val_loss'][-1]:.4f}")
+results = run_sequence_ablation(seq_lengths=[20, 50, 100, 200], epochs=15, steps_per_epoch=50)
+
+print("\n=== FULL SEQUENCE ABLATION RESULTS ===")
+for run_name, history in sorted(results.items()):
+    print(f"{run_name:20s}: final_val_loss={history['val_loss'][-1]:.4f}")
 
 print("\nRun 'mlflow ui --port 5000 --backend-store-uri sqlite:///mlflow.db' to inspect all runs.")
