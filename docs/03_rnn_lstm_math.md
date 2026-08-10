@@ -171,7 +171,83 @@ relevant information.
 
 ---
 
-## 7. Why This Matters Beyond Phase 3
+## 7. Why Standard Language Modeling Nearly Hides This Effect
+
+Having proven the mechanism directly (Sections 5-6), a natural next
+question is whether it matters for a REAL task. Training both
+VanillaRNN and LSTM on Shakespeare text with standard
+next-character-prediction loss across sequence lengths 20, 50, 100,
+and 200 characters showed nearly IDENTICAL final validation loss for
+both architectures at every length tested (differences of 0.01-0.04,
+well within noise):
+
+    Sequence length:    20      50      100     200
+    VanillaRNN:        2.0119  1.7985  1.8357  1.8525
+    LSTM:              2.0145  1.8405  1.8290  1.8144
+
+This is not a contradiction of the mechanistic finding above -- it
+reveals something important about WHEN vanishing gradients matter in
+practice. Natural language has strong LOCAL structure (spelling,
+common short words, punctuation patterns) that a model can exploit
+using only short-range context. Neither architecture needs genuine
+long-range memory to achieve reasonable next-character-prediction
+loss, so the practical impact of vanishing gradients depends on
+whether the TASK actually requires long-range dependency modeling --
+not merely on how long the input sequence is.
+
+---
+
+## 8. The Copy Task: Isolating Long-Range Memory Specifically
+
+To obtain a task-level result that isolates long-range memory from
+local structure, we used the "copy task" (Hochreiter & Schmidhuber,
+1997) -- the original synthetic benchmark used to demonstrate LSTM's
+advantage. The model observes a short sequence of random symbols,
+followed by a long gap of filler tokens, followed by a GO signal, and
+must reproduce the original symbols in order. This requires carrying
+information across the ENTIRE gap, with no local structure available
+to substitute for genuine memory.
+
+Training both architectures for 300 epochs at gap length 20:
+
+    VanillaRNN accuracy over training: oscillates between 10.0% and
+        14.4% for the ENTIRE 300 epochs -- never exceeds the random
+        baseline of 12.5% (1-in-8 symbols). No learning occurs.
+
+    LSTM accuracy over training: climbs from 14.25% (near baseline)
+        to a sustained 40-44% by epoch 240-300 -- roughly 3x better
+        than random guessing, and the improvement is monotonic and
+        reproducible, not noise.
+
+This is the clean, dramatic, task-level confirmation of the
+mechanistic findings in Sections 5-6: on a task specifically designed
+to require long-range memory and nothing else, VanillaRNN's inability
+to preserve gradient across a 20-timestep gap translates DIRECTLY
+into an inability to learn the task at all, while LSTM's
+gradient-preserving cell state (with forget gate biased toward
+"remember," per Section 6) allows real, sustained learning.
+
+**The complete evidentiary chain, from math to mechanism to task:**
+
+    Theory (Section 4):        additive cell-state recurrence should
+                                 preserve gradient when f_t is close to 1
+                  |
+    Mechanism (Sections 5-6):   isolated-recurrence testing confirms
+                                 this EXACTLY -- both architectures
+                                 collapse at random init; biasing f_t
+                                 toward 1 improves gradient preservation
+                                 by six orders of magnitude
+                  |
+    Task-level nuance (Sec 7):  standard language modeling loss barely
+                                 shows the effect, because most of the
+                                 task doesn't require long-range memory
+                  |
+    Task-level proof (Sec 8):   a task requiring ONLY long-range memory
+                                 (copy task) shows the dramatic,
+                                 unambiguous separation: VanillaRNN
+                                 never learns, LSTM clearly does
+
+## 9. Why This Matters Beyond Phase 3
 
 This finding connects directly to Phase 2's residual connection
 result. Both ResNet's `+x` identity shortcut and LSTM's `f_t * c_{t-1}`
