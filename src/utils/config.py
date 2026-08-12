@@ -112,6 +112,32 @@ class Phase3GenerationConfig:
     temperature:       float = _phase3_cfg["generation"]["temperature"]
     generate_length:     int   = _phase3_cfg["generation"]["generate_length"]
 
+_phase4_cfg = load_yaml("phase4_config.yaml")
+
+class Phase4DatasetConfig:
+    source:      str = _phase4_cfg["dataset"]["source"]
+    seq_length:   int = _phase4_cfg["dataset"]["seq_length"]
+    batch_size:    int = _phase4_cfg["dataset"]["batch_size"]
+
+class Phase4ModelConfig:
+    d_model:         int   = _phase4_cfg["model"]["d_model"]
+    num_heads:         int   = _phase4_cfg["model"]["num_heads"]
+    num_layers:          int   = _phase4_cfg["model"]["num_layers"]
+    d_ff:                  int   = _phase4_cfg["model"]["d_ff"]
+    dropout:                 float = _phase4_cfg["model"]["dropout"]
+    max_seq_length:            int   = _phase4_cfg["model"]["max_seq_length"]
+
+class Phase4TrainingConfig:
+    epochs:                int   = _phase4_cfg["training"]["epochs"]
+    learning_rate:            float = _phase4_cfg["training"]["learning_rate"]
+    optimizer:                  str   = _phase4_cfg["training"]["optimizer"]
+    gradient_clip_norm:            float = _phase4_cfg["training"]["gradient_clip_norm"]
+    warmup_steps:                     int   = _phase4_cfg["training"]["warmup_steps"]
+
+class Phase4GenerationConfig:
+    temperature:       float = _phase4_cfg["generation"]["temperature"]
+    generate_length:     int   = _phase4_cfg["generation"]["generate_length"]
+
 
 class EnvSettings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -139,6 +165,11 @@ class Settings:
     phase3_model:           Phase3ModelConfig       = Phase3ModelConfig()
     phase3_training:          Phase3TrainingConfig    = Phase3TrainingConfig()
     phase3_generation:          Phase3GenerationConfig  = Phase3GenerationConfig()
+    phase4_dataset:      Phase4DatasetConfig      = Phase4DatasetConfig()
+    phase4_model:           Phase4ModelConfig         = Phase4ModelConfig()
+    phase4_training:           Phase4TrainingConfig      = Phase4TrainingConfig()
+    phase4_generation:           Phase4GenerationConfig    = Phase4GenerationConfig()
+    scaling_study_configs:          dict                       = _phase4_cfg["scaling_study"]["model_sizes"]
 
 
 settings = Settings()
