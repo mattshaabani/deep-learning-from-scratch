@@ -138,6 +138,31 @@ class Phase4GenerationConfig:
     temperature:       float = _phase4_cfg["generation"]["temperature"]
     generate_length:     int   = _phase4_cfg["generation"]["generate_length"]
 
+_phase5_cfg = load_yaml("phase5_config.yaml")
+
+class Phase5ModelConfig:
+    d_model:           int = _phase5_cfg["model"]["d_model"]
+    num_heads:           int = _phase5_cfg["model"]["num_heads"]
+    num_layers:            int = _phase5_cfg["model"]["num_layers"]
+    d_ff:                     int = _phase5_cfg["model"]["d_ff"]
+    max_seq_length:              int = _phase5_cfg["model"]["max_seq_length"]
+    base_checkpoint:                str = _phase5_cfg["model"]["base_checkpoint"]
+
+class Phase5PreferenceConfig:
+    task:                str   = _phase5_cfg["preference_data"]["task"]
+    num_pairs:             int   = _phase5_cfg["preference_data"]["num_pairs"]
+    seq_length:              int   = _phase5_cfg["preference_data"]["seq_length"]
+    max_ngram_repeat:          int   = _phase5_cfg["preference_data"]["max_ngram_repeat"]
+
+class Phase5DPOConfig:
+    beta:            float = _phase5_cfg["dpo"]["beta"]
+    learning_rate:     float = _phase5_cfg["dpo"]["learning_rate"]
+    epochs:              int   = _phase5_cfg["dpo"]["epochs"]
+    batch_size:            int   = _phase5_cfg["dpo"]["batch_size"]
+
+class Phase5EvalConfig:
+    repetition_window: int = _phase5_cfg["evaluation"]["repetition_window"]
+
 
 class EnvSettings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -170,6 +195,10 @@ class Settings:
     phase4_training:           Phase4TrainingConfig      = Phase4TrainingConfig()
     phase4_generation:           Phase4GenerationConfig    = Phase4GenerationConfig()
     scaling_study_configs:          dict                       = _phase4_cfg["scaling_study"]["model_sizes"]
+    phase5_model:       Phase5ModelConfig       = Phase5ModelConfig()
+    phase5_preference:    Phase5PreferenceConfig  = Phase5PreferenceConfig()
+    phase5_dpo:             Phase5DPOConfig         = Phase5DPOConfig()
+    phase5_eval:              Phase5EvalConfig        = Phase5EvalConfig()
 
 
 settings = Settings()

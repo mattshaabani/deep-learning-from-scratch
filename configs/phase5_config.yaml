@@ -1,0 +1,22 @@
+model:
+  d_model: 64
+  num_heads: 2
+  num_layers: 2
+  d_ff: 256
+  max_seq_length: 256
+  base_checkpoint: "checkpoints/gpt_extended.pt"   # start from our trained Phase 4 model
+
+preference_data:
+  task: "anti_repetition"    # anti_repetition or style
+  num_pairs: 500
+  seq_length: 100
+  max_ngram_repeat: 3         # completions with repeats >= this are "losers"
+
+dpo:
+  beta: 0.1              # KL penalty strength
+  learning_rate: 0.00005
+  epochs: 30
+  batch_size: 16
+
+evaluation:
+  repetition_window: 4    # n-gram size for measuring repetition rate
