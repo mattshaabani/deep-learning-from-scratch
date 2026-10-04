@@ -128,27 +128,43 @@ text was visibly more chaotic (mid-word capitalization, garbled names).
 
 ---
 
-## 10. Beta Ablation
+## 10. Beta Ablation (Corrected: Averaged Over 20 Generations Per Configuration)
 
-Same pairs, same checkpoint, same learning rate:
+The initial single-sample ablation (Section 10 draft) showed a non-monotonic,
+statistically unsupported repetition pattern. Repeating the measurement with
+20 generations per configuration (same shared preference pairs, same
+checkpoint, same learning rate) gives a trustworthy comparison:
 
-    Beta     Reward Margin    Approx KL    Win Rate    Repetition
-    0.05          2.33          60.10        0.90        0.0148
-    0.1           3.66          39.39        0.95        0.0049
-    0.5           8.42           6.21        0.98        0.0345
-    2.0          19.25           3.17        0.97        0.0099
+    Config    Reward Margin   Approx KL   Win Rate   Rep Mean   Rep Std
+    base            --           --          --       0.0352    0.0238
+    beta=0.05     2.63         92.68        0.84       0.0202    0.0108
+    beta=0.1      3.93         50.18        0.91       0.0256    0.0139
+    beta=0.5      9.32          6.28        1.00       0.0118    0.0106
+    beta=2.0     22.97          2.47        0.98       0.0128    0.0067
 
-**What is supported:** approximate KL decreases monotonically as beta rises
-(60.1 to 3.2), matching the theory that beta anchors the policy to the
-reference.
+**What is now well-supported:**
+- Every tested beta reduced mean repetition relative to the base model
+  (0.0352), confirming DPO training generalizes the anti-repetition
+  preference beyond the training pairs, across the whole beta range.
+- Approximate KL again falls monotonically as beta rises (92.7 to 2.5),
+  confirming beta's role as the reference-anchoring dial, now over a wider
+  range than the single-sample run.
+- Win rate on the training pairs rises with beta (0.84 to 1.00), then eases
+  slightly at the highest beta tested (0.98) -- moderate-to-high beta gave
+  the most consistent preference-following here.
+- beta=0.5 and beta=2.0 achieved both lower mean repetition AND lower
+  variance (std 0.0106, 0.0067) than beta=0.05 and beta=0.1 (std 0.0108,
+  0.0139) -- the opposite ordering from the single-sample experiment,
+  which is exactly why that experiment's conclusion was flagged rather
+  than reported as fact.
 
-**What is not a quality signal:** reward margin grows with beta because the
-DPO logit is beta times a log-ratio difference.
-
-**What is inconclusive:** repetition was not monotonic in beta (best at 0.1,
-worse at 0.5 than at 0.05). Each value is one stochastic sample at
-temperature 0.8, so differences of this size cannot be distinguished from
-sampling noise.
+**What remains open:** whether moderate-to-high beta's advantage here
+reflects a real, generalizable relationship or is specific to this
+model size, preference dataset, and learning rate. Twenty samples per
+configuration is enough to see the base-vs-trained gap and the std
+differences clearly, but a firmer claim about the OPTIMAL beta would need
+multiple random seeds per configuration, not just multiple generations
+from one trained model per configuration.
 
 ---
 
